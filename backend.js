@@ -9,7 +9,7 @@ async function main() {
   const stockPriceUSD = stockData.Summary.Price;
   const stockPriceEUR = stockPriceUSD * exchangeRate;
 
-  console.log("price, USD: ", stockPriceUSD);
+  console.log("Price, USD: ", stockPriceUSD);
   console.log("Exchange rate: ", exchangeRate);
   console.log("Price, EUR: ", stockPriceEUR);
 }
