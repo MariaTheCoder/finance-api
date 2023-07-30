@@ -6,11 +6,12 @@ async function main() {
   const exchangeRate = await fetchExchangeRate("usd", "eur");
   const stockData = await fetchData();
 
-  const stockPrice = stockData.Summary.Price;
+  const stockPriceUSD = stockData.Summary.Price;
+  const stockPriceEUR = stockPriceUSD * exchangeRate;
 
-  console.log("price, USD: ", stockPrice);
+  console.log("price, USD: ", stockPriceUSD);
   console.log("Exchange rate: ", exchangeRate);
-  console.log("Price, EUR: ", stockPrice * exchangeRate);
+  console.log("Price, EUR: ", stockPriceEUR);
 }
 
 async function fetchData() {
