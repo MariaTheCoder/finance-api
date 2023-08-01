@@ -14,15 +14,9 @@ db.all(`SELECT * FROM stockSummary`, [], (err, rows) => {
 });
 
 async function main() {
-  const exchangeRate = await fetchExchangeRate("usd", "eur");
   const stockData = await fetchData();
 
-  const stockPriceUSD = stockData.Summary.Price;
-  const stockPriceEUR = stockPriceUSD * exchangeRate;
-
-  console.log("Price, USD: ", stockPriceUSD);
-  console.log("Exchange rate: ", exchangeRate);
-  console.log("Price, EUR: ", stockPriceEUR);
+  addToDatabase(stockData);
 }
 
 async function fetchData() {
@@ -50,4 +44,29 @@ async function fetchExchangeRate(fromCurrency, toCurrency) {
   const rate = await json.eur;
 
   return rate;
+}
+
+async function addToDatabase(dataObject) {
+  const exchangeRate = await fetchExchangeRate("usd", "eur");
+
+  const obj = {};
+  obj.date = new Date().toISOString();
+  obj.name = dataObject.Summary.Name;
+  obj.priceUSD = dataObject.Summary.Price;
+  obj.priceEUR = Number((obj.priceUSD * exchangeRate).toFixed(2));
+
+  db.run(
+    `INSERT INTO stockSummary VALUES (NULL, ?, ?, ?, ?)`,
+    [obj.date, obj.name, obj.priceUSD, obj.priceEUR],
+    (err) => {
+      if (err) {
+        console.log(err.message);
+        return;
+      }
+      console.log({
+        message: "success",
+        row: obj,
+      });
+    }
+  );
 }
