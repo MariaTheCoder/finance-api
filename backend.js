@@ -1,6 +1,17 @@
 const key = require("./apikey.json").key;
+const db = require("./database.js");
 
 main();
+db.all(`SELECT * FROM stockSummary`, [], (err, rows) => {
+  if (err) {
+    console.log(err.message);
+    return;
+  }
+  console.log({
+    message: "success",
+    data: rows,
+  });
+});
 
 async function main() {
   const exchangeRate = await fetchExchangeRate("usd", "eur");
