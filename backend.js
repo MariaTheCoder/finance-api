@@ -3,7 +3,7 @@ const db = require("./database.js");
 
 const express = require("express");
 const app = express();
-const port = process.env.PORT || 7999;
+const port = process.env.PORT || 9999;
 
 app.get("/api/stockdata", (req, res) => {
   try {
