@@ -27,7 +27,7 @@ app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
 
-// main();
+main();
 
 async function main() {
   const stockData = await fetchData();
@@ -68,12 +68,13 @@ async function addToDatabase(dataObject) {
   const obj = {};
   obj.date = new Date().toISOString();
   obj.name = dataObject.Summary.Name;
+  obj.stockSymbol = dataObject.Summary.StockSymbol;
   obj.priceUSD = dataObject.Summary.Price;
   obj.priceEUR = Number((obj.priceUSD * exchangeRate).toFixed(2));
 
   db.run(
-    `INSERT INTO stockSummary VALUES (NULL, ?, ?, ?, ?)`,
-    [obj.date, obj.name, obj.priceUSD, obj.priceEUR],
+    `INSERT INTO stockSummary VALUES (NULL, ?, ?, ?, ?, ?)`,
+    [obj.date, obj.name, obj.stockSymbol, obj.priceUSD, obj.priceEUR],
     (err) => {
       if (err) {
         console.log(err.message);
