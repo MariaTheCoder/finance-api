@@ -23,6 +23,26 @@ app.get("/api/stockdata", (req, res) => {
   }
 });
 
+app.get("/api/stockdata/:id", (req, res) => {
+  try {
+    const sql = "select * from stockSummary where id = ?";
+    const params = req.params.id;
+    db.get(sql, [params], (err, row) => {
+      if (err) {
+        res.status(400).json({ error: err.message });
+        return;
+      }
+      res.json({
+        message: "success",
+        row: row,
+      });
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ error: "Something is not working right!" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
@@ -30,14 +50,14 @@ app.listen(port, () => {
 main();
 
 async function main() {
-  const stockData = await fetchData();
+  const stockData = await fetchData("msft");
 
   addToDatabase(stockData);
 }
 
-async function fetchData() {
+async function fetchData(stockSymbol) {
   const response = await fetch(
-    "https://api.aletheiaapi.com/StockData?symbol=msft&summary=true",
+    `https://api.aletheiaapi.com/StockData?symbol=${stockSymbol}&summary=true`,
     {
       method: "GET",
       headers: {
