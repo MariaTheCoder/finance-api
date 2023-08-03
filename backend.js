@@ -1,17 +1,33 @@
 const key = require("./apikey.json").key;
 const db = require("./database.js");
 
-main();
-db.all(`SELECT * FROM stockSummary`, [], (err, rows) => {
-  if (err) {
-    console.log(err.message);
-    return;
+const express = require("express");
+const app = express();
+const port = process.env.PORT || 7999;
+
+app.get("/api/stockdata", (req, res) => {
+  try {
+    db.all(`SELECT * FROM stockSummary`, [], (err, rows) => {
+      if (err) {
+        res.status(400).json({ error: err.message });
+        return;
+      }
+      res.json({
+        message: "success",
+        data: rows,
+      });
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ error: "Something broke!" });
   }
-  console.log({
-    message: "success",
-    data: rows,
-  });
 });
+
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`);
+});
+
+// main();
 
 async function main() {
   const stockData = await fetchData();
