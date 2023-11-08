@@ -95,7 +95,10 @@ async function fetchExchangeRate(toCurrency) {
   const json = await response.json();
   const rate = await json[`${toCurrencyLowerCase}`];
 
-  return rate;
+  // create an object that can be returned
+  const obj = { currencyCode: toCurrencyLowerCase, latestExchangeRate: rate };
+
+  return obj;
 }
 
 /**
@@ -106,14 +109,24 @@ async function fetchExchangeRate(toCurrency) {
  * @param {string} dataObject.Summary.Price - Latest price in USD
  */
 async function addToDatabase(dataObject) {
-  const exchangeRate = await fetchExchangeRate("EUR");
+  const res = await fetchExchangeRate("EUR");
+
+  // the fetch returns an object with information we want to save in variables and modify
+  const exchangeRate = res?.latestExchangeRate;
+  const currencyCode = res?.currencyCode;
+
+  // use the currencyCode variable to construct a property name like "Price" combined with the currency code in all upper case
+  // we need the dynamic property name for later when we construct the data object that is to be saved in our database
+  const defaultPropName = "price";
+  const currencyCodeUpperCase = currencyCode.toUpperCase();
+  const propName = defaultPropName.concat(currencyCodeUpperCase);
 
   const obj = {};
   obj.date = new Date().toISOString();
   obj.name = dataObject.Summary.Name;
   obj.stockSymbol = dataObject.Summary.StockSymbol;
   obj.priceUSD = dataObject.Summary.Price;
-  obj.priceEUR = Number((obj.priceUSD * exchangeRate).toFixed(2));
+  obj[`${propName}`] = Number((obj.priceUSD * exchangeRate).toFixed(2));
 
   db.run(
     `INSERT INTO stockSummary VALUES (NULL, ?, ?, ?, ?, ?)`,
