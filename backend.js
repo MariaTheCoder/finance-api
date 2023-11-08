@@ -3,7 +3,7 @@ const db = require("./database.js");
 
 const express = require("express");
 const app = express();
-const port = process.env.PORT || 9999;
+const port = process.env.PORT || 9989;
 
 app.get("/api/stockdata", (req, res) => {
   try {
@@ -84,9 +84,9 @@ async function fetchData(stockSymbol) {
  * @param {string} toCurrency - Currency code of the foreign currency that you want the currency value of, e.g. EUR is the currency code for the currency Euro
  * @returns {number} Exchange rate between USD and the foreign currency
  */
-async function fetchExchangeRate(fromCurrency, toCurrency) {
+async function fetchExchangeRate(toCurrency) {
   const response = await fetch(
-    `https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/${fromCurrency}/${toCurrency}.json`
+    `https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/usd/${toCurrency}.json`
   );
 
   const json = await response.json();
@@ -103,7 +103,7 @@ async function fetchExchangeRate(fromCurrency, toCurrency) {
  * @param {string} dataObject.Summary.Price - Latest price in USD
  */
 async function addToDatabase(dataObject) {
-  const exchangeRate = await fetchExchangeRate("usd", "eur");
+  const exchangeRate = await fetchExchangeRate("eur");
 
   const obj = {};
   obj.date = new Date().toISOString();
