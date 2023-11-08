@@ -106,7 +106,7 @@ async function fetchExchangeRate(toCurrency) {
  * @param {Object} dataObject - Pre-existing fetched data object containing stock data
  * @param {string} dataObject.Summary.Name - Name of the company behind the stock
  * @param {string} dataObject.Summary.StockSymbol - The stock symbol
- * @param {string} dataObject.Summary.Price - Latest price in USD
+ * @param {number} dataObject.Summary.Price - Latest price in USD
  */
 async function addToDatabase(dataObject) {
   const res = await fetchExchangeRate("EUR");
