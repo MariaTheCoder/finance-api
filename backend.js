@@ -49,12 +49,20 @@ app.listen(port, () => {
 
 main();
 
+/**
+ * The main function which is called upon app launch.
+ */
 async function main() {
-  const stockData = await fetchData("msft");
+  const stockData = await fetchData("aapl");
 
   addToDatabase(stockData);
 }
 
+/**
+ * Fetch data of the stock with a given stock symbol
+ * @param {string} stockSymbol - Symbol of a stock, e.g. AAPL for Apple Inc.
+ * @returns {Object} Object containing fetched stock data
+ */
 async function fetchData(stockSymbol) {
   const response = await fetch(
     `https://api.aletheiaapi.com/StockData?symbol=${stockSymbol}&summary=true`,
@@ -71,6 +79,11 @@ async function fetchData(stockSymbol) {
   return json;
 }
 
+/**
+ * Use this function to find the exchange rate between USD and another given currency
+ * @param {string} toCurrency - Currency code of the foreign currency that you want the currency value of, e.g. EUR is the currency code for the currency Euro
+ * @returns {number} Exchange rate between USD and the foreign currency
+ */
 async function fetchExchangeRate(fromCurrency, toCurrency) {
   const response = await fetch(
     `https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/${fromCurrency}/${toCurrency}.json`
@@ -82,6 +95,13 @@ async function fetchExchangeRate(fromCurrency, toCurrency) {
   return rate;
 }
 
+/**
+ * Adds a data object to the sqlite3 database
+ * @param {Object} dataObject - Pre-existing fetched data object containing stock data
+ * @param {string} dataObject.Summary.Name - Name of the company behind the stock
+ * @param {string} dataObject.Summary.StockSymbol - The stock symbol
+ * @param {string} dataObject.Summary.Price - Latest price in USD
+ */
 async function addToDatabase(dataObject) {
   const exchangeRate = await fetchExchangeRate("usd", "eur");
 
