@@ -70,6 +70,7 @@ async function fetchData(stockSymbol) {
       method: "GET",
       headers: {
         key: key,
+        "Content-Type": "application/json;charset=UTF-8",
       },
     }
   );
@@ -89,7 +90,12 @@ async function fetchExchangeRate(toCurrency) {
   const toCurrencyLowerCase = toCurrency.toLowerCase();
 
   const response = await fetch(
-    `https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/usd/${toCurrencyLowerCase}.json`
+    `https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/usd/${toCurrencyLowerCase}.json`,
+    {
+      headers: {
+        "Content-Type": "application/json;charset=UTF-8",
+      },
+    }
   );
 
   const json = await response.json();
