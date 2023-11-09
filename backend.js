@@ -221,6 +221,11 @@ function generatePropertyName(currencyCode) {
   return propName;
 }
 
+/**
+ * Check if all elements of an array are of type string
+ * @param {array} array Any array
+ * @returns {boolean} Returns true if all elements of given array are of type string
+ */
 function allElementsAreStrings(array) {
   if (!array || !Array.isArray(array)) {
     return alert("Parameter is not an array");
