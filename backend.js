@@ -3,7 +3,7 @@ const db = require("./database.js");
 
 const express = require("express");
 const app = express();
-const port = process.env.PORT || 9969;
+const port = process.env.PORT || 9989;
 
 app.get("/api/stockdata", (req, res) => {
   try {
@@ -109,25 +109,20 @@ async function fetchExchangeRate(toCurrency) {
  * @param {number} dataObject.Summary.Price - Latest price in USD
  */
 async function addToDatabase(dataObject) {
-  const res = await fetchExchangeRate("EUR");
+  const [eur, dkk] = await generateForeignCurrencyArray(["eur", "dkk"]);
 
-  // the fetch returns an object with information we want to save in variables and modify
-  const exchangeRate = res?.latestExchangeRate;
-  const currencyCode = res?.currencyCode;
-
-  // use the currencyCode variable to construct a property name like "Price" combined with the currency code in all upper case
-  // we need the dynamic property name for later when we construct the data object that is to be saved in our database
-  const defaultPropName = "price";
-  const currencyCodeUpperCase = currencyCode.toUpperCase();
-  const propName = defaultPropName.concat(currencyCodeUpperCase);
-
+  // now it is time to create the data object which we want to save to the database
   const obj = {};
   obj.date = new Date().toISOString();
   obj.name = dataObject.Summary.Name;
   obj.stockSymbol = dataObject.Summary.StockSymbol;
   obj.priceUSD = dataObject.Summary.Price;
-  obj[`${propName}`] = Number((obj.priceUSD * exchangeRate).toFixed(2));
-
+  obj[`${eur.propName}`] = Number(
+    (obj.priceUSD * eur.latestExchangeRate).toFixed(2)
+  );
+  obj[`${dkk.propName}`] = Number(
+    (obj.priceUSD * dkk.latestExchangeRate).toFixed(2)
+  );
   db.run(
     `INSERT INTO stockSummary VALUES (NULL, ?, ?, ?, ?, ?)`,
     [obj.date, obj.name, obj.stockSymbol, obj.priceUSD, obj.priceEUR],
@@ -142,4 +137,68 @@ async function addToDatabase(dataObject) {
       });
     }
   );
+}
+
+async function generateForeignCurrencyArray(arrayOfStringCurrencies) {
+  // first we need to check if the parameter used for the function call even was given, if it in an array and if all elements are strings
+  if (
+    !arrayOfStringCurrencies ||
+    !Array.isArray(arrayOfStringCurrencies) ||
+    !allElementsAreStrings(arrayOfStringCurrencies)
+  ) {
+    return alert("Parameter has to be an array of strings");
+  }
+
+  // at this point we know the parameter used for the function call lives up to our minimum criteria, so we can continue...
+  // first we need to loop over the array of currencyCodes and fetch some data
+  const resArray = [];
+
+  for (let i = 0; i < arrayOfStringCurrencies.length; i++) {
+    const currencyCode = arrayOfStringCurrencies[i];
+
+    const exchangeRateObj = await fetchExchangeRate(currencyCode);
+    exchangeRateObj.propName = await generatePropertyName(currencyCode);
+
+    // Save result object to the result array variable
+    await resArray.push(exchangeRateObj);
+  }
+
+  if (!Array.isArray(resArray)) {
+    console.log("resArray is not an array...");
+    return;
+  }
+  if (resArray.length === 0) {
+    console.log("resArray is still empty...");
+    return;
+  }
+  if (!resArray) {
+    console.log("resArray does not exist...");
+    return;
+  }
+
+  if (resArray.length > 0) return resArray;
+}
+
+function generatePropertyName(currencyCode) {
+  let propName = "";
+
+  const defaultPropName = "price";
+  const currencyCodeUpperCase = currencyCode.toUpperCase();
+  propName = defaultPropName.concat(currencyCodeUpperCase);
+
+  // Return generated propName
+  return propName;
+}
+
+function allElementsAreStrings(array) {
+  if (!array || !Array.isArray(array)) {
+    return alert("Parameter is not an array");
+  }
+  let countStringElements = 0;
+
+  array.forEach((element) => {
+    if (typeof element === "string") countStringElements++;
+  });
+
+  return countStringElements === array.length;
 }
