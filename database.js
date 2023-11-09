@@ -9,7 +9,7 @@ let db = new sqlite3.Database(DBSOURCE, (err) => {
   } else {
     console.log("Connected to the SQLite database.");
     db.run(
-      `CREATE TABLE stockSummary (id INTEGER PRIMARY KEY AUTOINCREMENT,date text,name text,stockSymbol text,priceUSD integer,priceEUR integer)`,
+      `CREATE TABLE stockSummary (id INTEGER PRIMARY KEY AUTOINCREMENT,date text,name text,stockSymbol text,priceUSD integer,priceEUR integer, priceDKK integer)`,
       (err) => {
         if (err) {
           console.log("Table already created.");

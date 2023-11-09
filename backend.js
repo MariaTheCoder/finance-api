@@ -124,8 +124,15 @@ async function addToDatabase(dataObject) {
     (obj.priceUSD * dkk.latestExchangeRate).toFixed(2)
   );
   db.run(
-    `INSERT INTO stockSummary VALUES (NULL, ?, ?, ?, ?, ?)`,
-    [obj.date, obj.name, obj.stockSymbol, obj.priceUSD, obj.priceEUR],
+    `INSERT INTO stockSummary VALUES (NULL, ?, ?, ?, ?, ?, ?)`,
+    [
+      obj.date,
+      obj.name,
+      obj.stockSymbol,
+      obj.priceUSD,
+      obj.priceEUR,
+      obj.priceDKK,
+    ],
     (err) => {
       if (err) {
         console.log(err.message);
