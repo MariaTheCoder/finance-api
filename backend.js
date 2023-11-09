@@ -205,6 +205,11 @@ async function generateForeignCurrencyArray(arrayOfStringCurrencies) {
   if (resArray.length > 0) return resArray;
 }
 
+/**
+ * Generate property name consisting string "price" + a currency code in all capital letters given a currency code in string format
+ * @param {string} currencyCode Currency code in string format
+ * @returns {string} Returns property name, e.g. "priceEUR", "priceSEK", etc.
+ */
 function generatePropertyName(currencyCode) {
   let propName = "";
 
