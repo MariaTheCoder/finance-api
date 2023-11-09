@@ -1,9 +1,16 @@
+require("dotenv").config();
 const key = require("./apikey.json").key;
 const db = require("./database.js");
-
 const express = require("express");
 const app = express();
-const port = process.env.PORT || 9989;
+let port;
+
+// Check whether we are working in development or production mode
+if (process.env.STATUS === "development") {
+  port = process.env.DEV_PORT;
+} else {
+  port = process.env.PROD_PORT;
+}
 
 app.get("/api/stockdata", (req, res) => {
   try {
@@ -44,7 +51,9 @@ app.get("/api/stockdata/:id", (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+  console.log(
+    `Server in ${process.env.STATUS} mode, listening on port ${port}`
+  );
 });
 
 main();
