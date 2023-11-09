@@ -152,6 +152,19 @@ async function addToDatabase(dataObject) {
   );
 }
 
+/**
+ * @typedef currencyObject
+ * @type {object}
+ * @property {string} currencyCode - a currency code in string format, e.g. "usd", "eur", "sek", etc.
+ * @property {number} latestExchangeRate - latest exchange rate
+ * @property {string} propName - generated property name of shape "price" + currency code in all upper case
+ */
+
+/**
+ * Generates an array consisting of information on given currency codes
+ * @param {string[]} arrayOfStringCurrencies Array of currency codes in string format, e.g. "eur", "sek", "inr", etc.
+ * @returns {currencyObject} currencyObj - An object containing information about a certain currency
+ */
 async function generateForeignCurrencyArray(arrayOfStringCurrencies) {
   // first we need to check if the parameter used for the function call even was given, if it in an array and if all elements are strings
   if (
