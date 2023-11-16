@@ -1,4 +1,5 @@
 require("dotenv").config();
+// @ts-ignore
 const key = require("./apikey.json").key;
 const db = require("./database.js");
 const express = require("express");
@@ -69,8 +70,9 @@ async function main() {
 
 /**
  * Fetch data of the stock with a given stock symbol
+ * @async
  * @param {string} stockSymbol - Symbol of a stock, e.g. AAPL for Apple Inc.
- * @returns {Object} Object containing fetched stock data
+ * @returns {Promise<object>} Promise object containing fetched stock data
  */
 async function fetchData(stockSymbol) {
   const response = await fetch(
@@ -91,8 +93,9 @@ async function fetchData(stockSymbol) {
 
 /**
  * Use this function to find the exchange rate between USD and another given currency
+ * @async
  * @param {string} toCurrency - Currency code of the foreign currency that you want the currency value of, e.g. EUR is the currency code for the currency Euro
- * @returns {number} Exchange rate between USD and the foreign currency
+ * @returns {Promise<object>} Promise object containing the currency code of the currency that the user wants to convert the stock price into and the exchange rate between USD and the foreign currency
  */
 async function fetchExchangeRate(toCurrency) {
   // for the fetch request to work, we need to ensure that the currency code is all in lower case
@@ -117,13 +120,22 @@ async function fetchExchangeRate(toCurrency) {
 }
 
 /**
+ * @typedef {object} dataObject
+ * @property {object} dataObject.Summary - A Summary object
+ * @property {string} dataObject.Summary.Name - Name of the company behind the stock
+ * @property {string} dataObject.Summary.StockSymbol - The stock symbol
+ * @property {number} dataObject.Summary.Price - Latest price in USD
+ */
+
+/**
  * Adds a data object to the sqlite3 database
- * @param {Object} dataObject - Pre-existing fetched data object containing stock data
- * @param {string} dataObject.Summary.Name - Name of the company behind the stock
- * @param {string} dataObject.Summary.StockSymbol - The stock symbol
- * @param {number} dataObject.Summary.Price - Latest price in USD
+ * @async
+ * @param {dataObject} dataObject - Pre-existing fetched data object containing stock data
  */
 async function addToDatabase(dataObject) {
+  /**
+   * @type {object}
+   */
   const [eur, dkk] = await generateForeignCurrencyArray(["eur", "dkk"]);
 
   // now it is time to create the data object which we want to save to the database
@@ -162,8 +174,7 @@ async function addToDatabase(dataObject) {
 }
 
 /**
- * @typedef currencyObject
- * @type {object}
+ * @typedef {object} currencyObject
  * @property {string} currencyCode - a currency code in string format, e.g. "usd", "eur", "sek", etc.
  * @property {number} latestExchangeRate - latest exchange rate
  * @property {string} propName - generated property name of shape "price" + currency code in all upper case
@@ -171,8 +182,10 @@ async function addToDatabase(dataObject) {
 
 /**
  * Generates an array consisting of information on given currency codes
+ * @async
  * @param {string[]} arrayOfStringCurrencies Array of currency codes in string format, e.g. "eur", "sek", "inr", etc.
- * @returns {currencyObject} currencyObj - An object containing information about a certain currency
+ * @promise {Promise<currencyObject>} currencyObject - An object containing information about a certain currency
+ * @rejects {Error}
  */
 async function generateForeignCurrencyArray(arrayOfStringCurrencies) {
   // first we need to check if the parameter used for the function call even was given, if it in an array and if all elements are strings
@@ -186,7 +199,7 @@ async function generateForeignCurrencyArray(arrayOfStringCurrencies) {
 
   // at this point we know the parameter used for the function call lives up to our minimum criteria, so we can continue...
   // first we need to loop over the array of currencyCodes and fetch some data
-  const resArray = [];
+  const currencyObject = [];
 
   for (let i = 0; i < arrayOfStringCurrencies.length; i++) {
     const currencyCode = arrayOfStringCurrencies[i];
@@ -195,23 +208,24 @@ async function generateForeignCurrencyArray(arrayOfStringCurrencies) {
     exchangeRateObj.propName = await generatePropertyName(currencyCode);
 
     // Save result object to the result array variable
-    await resArray.push(exchangeRateObj);
+    await currencyObject.push(exchangeRateObj);
   }
 
-  if (!Array.isArray(resArray)) {
+  if (!Array.isArray(currencyObject)) {
     console.log("resArray is not an array...");
     return;
   }
-  if (resArray.length === 0) {
+  if (currencyObject.length === 0) {
     console.log("resArray is still empty...");
     return;
   }
-  if (!resArray) {
+  if (!currencyObject) {
     console.log("resArray does not exist...");
     return;
   }
 
-  if (resArray.length > 0) return resArray;
+  console.log("resArray:", currencyObject);
+  if (currencyObject.length > 0) return currencyObject;
 }
 
 /**
@@ -233,7 +247,7 @@ function generatePropertyName(currencyCode) {
 /**
  * Check if all elements of an array are of type string
  * @param {array} array Any array
- * @returns {boolean} Returns true if all elements of given array are of type string
+ * @returns {boolean|void} Returns true if all elements of given array are of type string
  */
 function allElementsAreStrings(array) {
   if (!array || !Array.isArray(array)) {
